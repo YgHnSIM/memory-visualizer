@@ -1650,19 +1650,19 @@ svg#minimapSvg {
         box-shadow: inset 0 -2px 0 var(--accent-primary);
     }
 
-    .panel {
+    .main-content > .panel {
         display: none;
     }
 
-    .panel.memory-view {
+    .main-content > .panel.memory-view {
         display: flex;
     }
 
-    .panel.active {
+    .main-content > .panel.active {
         display: flex;
     }
 
-    .main-content:has(.panel.active:not(.memory-view)) .panel.memory-view {
+    .main-content:has(> .panel.active:not(.memory-view)) > .panel.memory-view {
         display: none;
     }
 
