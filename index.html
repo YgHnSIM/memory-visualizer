@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C언어 메모리 시각화 도구</title>
+    <meta name="description" content="C언어 학습을 위한 메모리 구조 시각화 도구. 변수, 포인터, 배열, 구조체의 메모리 배치를 직관적으로 이해하세요.">
+
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Main Content (3-Pane Layout) -->
+        <main class="main-content">
+            <!-- Left Panel: Memory View -->
+            <div class="panel memory-view">
+                <div class="panel-header header-row">
+                    <h2><span class="icon">📊</span> 메모리 뷰</h2>
+                    <div class="controls">
+                        <label>주소 모드:
+                            <input type="radio" name="addressMode" value="64" checked> 64비트
+                            <input type="radio" name="addressMode" value="32"> 32비트
+                        </label>
+                        <label>표시 형식:
+                            <input type="radio" name="displayMode" value="hex" checked> 16진수
+                            <input type="radio" name="displayMode" value="bin"> 2진수
+                        </label>
+                        <label>바이트 순서:
+                            <input type="radio" name="byteOrder" value="little" checked> 리틀(Little)
+                            <input type="radio" name="byteOrder" value="big"> 빅(Big)
+                        </label>
+                    </div>
+                </div>
+                <div class="memory-content" id="memoryContent">
+                    <div class="memory-table-container">
+                        <table class="memory-table" id="memoryTable">
+                            <thead>
+                                <tr>
+                                    <th class="col-address">ADDRESS</th>
+                                    <th class="col-name">NAME</th>
+                                    <th class="col-element">ELEMENT</th>
+                                    <th class="col-data">DATA</th>
+                                    <th class="col-represent">REPRESENT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="memoryTableBody">
+                                <tr class="empty-state">
+                                    <td colspan="5">
+                                        <div class="empty-message">
+                                            <span class="empty-icon">💡</span>
+                                            <p>우측에 C 코드를 입력하고<br>"분석하기" 버튼을 클릭하세요</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+<!-- Resizer 1 -->
+            <div class="resizer" id="resizerLeft"></div>
+
+            <!-- Center Panel: Code Editor -->
+            <div class="panel editor-pane">
+                <div class="panel-header" style="justify-content: space-between; align-items: center;">
+                    <h2><span class="icon">📝</span> C 코드</h2>
+                    <select id="exampleSelect" class="example-select" style="padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 0.85rem; outline: none; cursor: pointer;">
+                        <option value="custom">직접 입력 (Custom)</option>
+                        <option value="basic" selected>기본 예제 (Basic)</option>
+                        <option value="array">배열과 포인터 (Array & Ptr)</option>
+                        <option value="dynamic">동적 할당 (Malloc/Heap)</option>
+                        <option value="linked_list">연결 리스트 (Linked List)</option>
+                        <option value="struct">구조체 (Struct)</option>
+                        <option value="double_ptr">이중 포인터 (Double Ptr)</option>
+                        <option value="string">문자열 처리 (String)</option>
+                        <option value="struct_ptr">구조체 포인터 (Struct Ptr)</option>
+                        <option value="struct_array">구조체 배열 (Struct Array)</option>
+                        <option value="pointer_arith">포인터 산술 (Pointer Arithmetic)</option>
+                        <option value="multi_ptr">다중 포인터 (Multi Pointer)</option>
+                        <option value="nested_struct">중첩 구조체 (Nested Struct)</option>
+                        <option value="func_ptr">함수 포인터 (Function Pointer)</option>
+                        <option value="buffer_overflow">버퍼 오버플로우 (Concept)</option>
+                        <option value="padding">정렬/패딩 (Alignment & Padding)</option>
+                        <option value="union_example">유니온 (Union)</option>
+                        <option value="swap">값/주소 전달 (Swap)</option>
+                        <option value="overflow">정수 오버플로우 (Overflow)</option>
+                        <option value="bits">비트 연산/2의 보수 (Bit Ops)</option>
+                        <option value="strcpy_overflow">strcpy 오버플로우 (Concept)</option>
+                        <option value="typedef_enum">typedef/enum</option>
+                        <option value="free_dangling">free()/댕글링 (Dangling)</option>
+                        <option value="functions">함수 호출/스택 프레임 (Functions)</option>
+                        <option value="recursion">재귀 호출 (Recursion)</option>
+                        <option value="swap_func">포인터 인자 swap (Pointer Args)</option>
+                        <option value="loops">while/for 루프 (Loops)</option>
+                        <option value="array_func">배열 인자/인덱싱 (Array Args)</option>
+                        <option value="break_continue">break/continue & 중첩 루프 (Loops 2)</option>
+                    </select>
+                </div>
+                <div class="editor-container">
+                    <textarea id="codeEditor">// C Memory Visualizer
+// Analyze memory structure, pointers, and values.
+
+struct Point {
+    int x;
+    int y;
+};
+
+struct Test {
+    int number;
+    char f_name[];
+    char l_name[];
+};
+    
+struct Point p1 = {1242142155, 235236136};
+struct Test t2 = {001, "Sim", "YH"};
+struct Point p2;
+
+int *ptr_x = &p1.x;
+int *ptr_y = &p1.y;
+int **pp_x = &ptr_x;
+</textarea>
+                </div>
+                <div class="panel-footer">
+                    <button id="analyzeBtn" class="btn primary">
+                        <span class="icon">▶</span> 분석하기
+                    </button>
+                    <button id="resetBtn" class="btn secondary">
+                        <span class="icon">🗑️</span> 초기화
+                    </button>
+                    <span id="analysisStatus" class="analysis-status">준비됨</span>
+                    <span class="step-controls">
+                        <button id="stepBackBtn" class="btn secondary" title="이전 단계">◀</button>
+                        <button id="stepNextBtn" class="btn secondary" title="다음 단계">▶</button>
+                        <input type="range" id="stepSlider" min="0" max="0" value="0" title="단계 이동">
+                        <span id="stepInfo" class="step-info">단계 0/0</span>
+                    </span>
+                </div>
+                <div id="learningPoints" class="learning-points" hidden></div>
+                <div id="errorPanel" class="error-panel" hidden>
+                    <div class="error-panel-title">
+                        <span>⚠️ 진단 메시지</span>
+                        <button id="errorCloseBtn" class="error-close" title="닫기">✕</button>
+                    </div>
+                    <ul id="errorList" class="error-list"></ul>
+                </div>
+            </div>
+
+            <!-- Resizer 2 -->
+            <div class="resizer" id="resizerRight"></div>
+
+            <!-- Right Panel: Usage + Minimap (Vertical Stack) -->
+            <div class="panel side-pane">
+                <!-- Usage Summary -->
+                <div id="usageStrip" class="usage-strip" hidden></div>
+
+                <!-- Horizontal Resizer -->
+                <div class="resizer resizer-h" id="resizerUsage" hidden></div>
+
+                <!-- Minimap Section -->
+                <div class="panel minimap-pane">
+                    <div class="panel-header" style="justify-content: space-between; padding: 5px 10px;">
+                        <h2><span class="icon">🗺️</span> 미니맵</h2>
+                    </div>
+                    <div class="minimap-content" id="minimapContent">
+                        <!-- SVG Minimap -->
+                        <svg id="minimapSvg" width="100%" height="100%"></svg>
+                    </div>
+                </div>
+            </div>
+</main>
+        <div class="legend">
+            <h3>타입 범례</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="legend-color type-char"></span>
+                    <span>char (1)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color type-short"></span>
+                    <span>short (2)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color type-int"></span>
+                    <span>int (4)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color type-long"></span>
+                    <span>long (8)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color type-float"></span>
+                    <span>float (4)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color type-double"></span>
+                    <span>double (8)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color type-pointer"></span>
+                    <span>pointer</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color type-struct"></span>
+                    <span>struct</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="js/parser.js"></script>
+    <script src="js/memory.js"></script>
+    <script src="js/visualizer.js"></script>
+    <script src="js/minimap.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
