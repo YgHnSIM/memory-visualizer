@@ -77,11 +77,24 @@ body {
     line-height: 1.6;
 }
 
+/* Mobile touch baseline (todo 1c) */
+button,
+select,
+input[type=radio],
+input[type=range] {
+    touch-action: manipulation;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
 /* App Container */
 .app-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    height: 100dvh;
     background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
 }
 
@@ -263,6 +276,7 @@ svg#minimapSvg {
 
 /* Resizer */
 .resizer {
+    touch-action: none;
     width: 6px;
     background: var(--border-color);
     cursor: col-resize;
@@ -1596,4 +1610,12 @@ svg#minimapSvg {
 }
 .frame-calls {
     color: var(--dracula-cyan, #8be9fd);
+}
+
+/* Mobile safe-area (todo 1b): viewports < 640px */
+@media (max-width: 639.98px) {
+    .panel-footer,
+    .legend {
+        padding-bottom: max(env(safe-area-inset-bottom), 8px);
+    }
 }
