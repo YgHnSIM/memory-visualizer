@@ -1670,3 +1670,38 @@ svg#minimapSvg {
         display: none;
     }
 }
+
+/* Mobile toolbar/controls (todo 8): wrap footer, 36px tap targets, iOS zoom guard */
+@media (max-width: 639.98px) {
+    .panel-footer {
+        flex-wrap: wrap;
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .step-controls {
+        flex: 1 1 100%;
+    }
+
+    /* mobile tap-target override (F2 예외) */
+    .step-controls .btn {
+        width: 36px;
+        height: 36px !important;
+        max-height: none !important;
+        font-size: 1rem;
+    }
+
+    .step-controls input[type="range"] {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .editor-container .CodeMirror {
+        font-size: 16px;
+    }
+
+    svg#minimapSvg.touch-minimize {
+        height: 28px;
+        min-height: 28px;
+    }
+}
