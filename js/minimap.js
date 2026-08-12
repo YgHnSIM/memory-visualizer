@@ -31,6 +31,10 @@ class MinimapVisualizer {
         this.startPos = { x: 0, y: 0 };
         this.pan = { x: 0, y: 0 }; // Current pan offset
 
+        // Touch panning state (mobile)
+        this.touchPointers = new Map(); // pointerId -> {x, y}
+        this.touchPendingToggle = false;
+
         this.init();
         this.enableDragPan();
     }
@@ -123,6 +127,89 @@ class MinimapVisualizer {
                 }, 50);
             }
         });
+
+        const TOUCH_DRAG_THRESHOLD = 6;
+        if (typeof container.style.setProperty === 'function') {
+            container.style.setProperty('touch-action', 'none');
+        } else {
+            container.style.touchAction = 'none';
+        }
+
+        const touchEnd = (e) => {
+            if (e.pointerType !== 'touch') return;
+            if (!this.touchPointers.has(e.pointerId)) return;
+            this.touchPointers.delete(e.pointerId);
+            if (this.dragState) {
+                container.style.cursor = '';
+                this.isDragging = false;
+                this.dragState = null;
+            }
+            this.touchPendingToggle = false;
+        };
+
+        container.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'touch') return;
+            if (this.touchPointers.size >= 2) return;
+            if (e.target && typeof e.target.setPointerCapture === 'function') {
+                try { e.target.setPointerCapture(e.pointerId); } catch (err) {}
+            }
+            this.touchPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            if (this.touchPointers.size === 1) {
+                this.dragState = 'potential';
+                this.isDragging = false;
+                this.startPos = { x: e.clientX, y: e.clientY };
+                this.panStart = { x: this.pan.x, y: this.pan.y };
+                this.svg.classList.toggle('touch-minimize');
+                this.touchPendingToggle = true;
+                container.style.cursor = 'grabbing';
+            } else {
+                this.dragState = null;
+                this.isDragging = false;
+                if (this.touchPendingToggle) {
+                    this.svg.classList.toggle('touch-minimize');
+                    this.touchPendingToggle = false;
+                }
+                container.style.cursor = '';
+            }
+            if (typeof e.preventDefault === 'function') e.preventDefault();
+        });
+
+        container.addEventListener('pointermove', (e) => {
+            if (e.pointerType !== 'touch') return;
+            if (this.touchPointers.size >= 2) return;
+            if (!this.touchPointers.has(e.pointerId)) return;
+            if (this.dragState !== 'potential' && this.dragState !== 'dragging') return;
+
+            const p = this.touchPointers.get(e.pointerId);
+            p.x = e.clientX;
+            p.y = e.clientY;
+
+            const dx = e.clientX - this.startPos.x;
+            const dy = e.clientY - this.startPos.y;
+
+            if (Math.abs(dx) > TOUCH_DRAG_THRESHOLD || Math.abs(dy) > TOUCH_DRAG_THRESHOLD) {
+                if (this.dragState === 'potential') {
+                    this.dragState = 'dragging';
+                    this.isDragging = true;
+                    if (this.touchPendingToggle) {
+                        this.svg.classList.toggle('touch-minimize');
+                        this.touchPendingToggle = false;
+                    }
+                }
+            }
+
+            if (this.dragState === 'dragging') {
+                this.pan.x = this.panStart.x + dx;
+                this.pan.y = this.panStart.y + dy;
+                this.updateTransform();
+            }
+
+            if (typeof e.stopPropagation === 'function') e.stopPropagation();
+            if (typeof e.preventDefault === 'function') e.preventDefault();
+        });
+
+        window.addEventListener('pointerup', touchEnd);
+        window.addEventListener('pointercancel', touchEnd);
     }
 
     setScale(scale) {
