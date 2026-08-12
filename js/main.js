@@ -529,6 +529,9 @@ int main() {
     // Setup minimap interactions
     setupMinimapInteractions();
 
+    // 640px boundary watcher (initial apply + on crossing)
+    updateViewVisibility();
+
     // Main analyze function
     let stepIndex = 0;
 
@@ -790,34 +793,14 @@ int main() {
         let isResizingRight = false;
         let isResizingUsage = false;
 
-        resizerLeft.addEventListener('mousedown', function (e) {
-            isResizingLeft = true;
-            document.body.style.cursor = 'col-resize';
-            document.body.style.userSelect = 'none';
-        });
-
-        resizerRight.addEventListener('mousedown', function (e) {
-            isResizingRight = true;
-            document.body.style.cursor = 'col-resize';
-            document.body.style.userSelect = 'none';
-        });
-
-        if (resizerUsage) {
-            resizerUsage.addEventListener('mousedown', function (e) {
-                isResizingUsage = true;
-                document.body.style.cursor = 'row-resize';
-                document.body.style.userSelect = 'none';
-            });
-        }
-
-        document.addEventListener('mousemove', function (e) {
+        function handleResizePointerMove(e) {
             if (!isResizingLeft && !isResizingRight && !isResizingUsage) return;
 
             const containerRect = container.getBoundingClientRect();
 
             if (isResizingLeft) {
                 // Resize memory panel width
-                // Calculate width based on mouse position relative to container left
+                // Calculate width based on pointer position relative to container left
                 let newWidth = e.clientX - containerRect.left;
                 if (newWidth < 200) newWidth = 200;
                 if (newWidth > containerRect.width - 400) newWidth = containerRect.width - 400; // Leave space for minimap + editor
@@ -827,7 +810,7 @@ int main() {
             else if (isResizingRight && sidePane) {
                 // Resize side rail width
                 // The position of right resizer determines the end of side rail
-                // Easier: Calculate side rail width = containerRight - mouseX
+                // Easier: Calculate side rail width = containerRight - pointerX
                 let newWidth = containerRect.right - e.clientX;
                 if (newWidth < 200) newWidth = 200;
                 if (newWidth > containerRect.width - memoryPanel.getBoundingClientRect().width - 200) {
@@ -845,15 +828,78 @@ int main() {
 
                 usageStrip.style.flex = `0 0 ${newHeight}px`;
             }
-        });
+        }
 
-        document.addEventListener('mouseup', function () {
+        function endResize() {
             isResizingLeft = false;
             isResizingRight = false;
             isResizingUsage = false;
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
+        }
+
+        function beginResize(e, axis) {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            if (axis === 'col') {
+                document.body.style.cursor = 'col-resize';
+            } else {
+                document.body.style.cursor = 'row-resize';
+            }
+            document.body.style.userSelect = 'none';
+            e.target.setPointerCapture(e.pointerId);
+            return true;
+        }
+
+        resizerLeft.addEventListener('pointerdown', function (e) {
+            if (!beginResize(e, 'col')) return;
+            isResizingLeft = true;
         });
+
+        resizerLeft.addEventListener('pointermove', handleResizePointerMove);
+        resizerLeft.addEventListener('pointerup', endResize);
+        resizerLeft.addEventListener('pointercancel', endResize);
+
+        resizerRight.addEventListener('pointerdown', function (e) {
+            if (!beginResize(e, 'col')) return;
+            isResizingRight = true;
+        });
+
+        resizerRight.addEventListener('pointermove', handleResizePointerMove);
+        resizerRight.addEventListener('pointerup', endResize);
+        resizerRight.addEventListener('pointercancel', endResize);
+
+        if (resizerUsage) {
+            resizerUsage.addEventListener('pointerdown', function (e) {
+                if (!beginResize(e, 'row')) return;
+                isResizingUsage = true;
+            });
+
+            resizerUsage.addEventListener('pointermove', handleResizePointerMove);
+            resizerUsage.addEventListener('pointerup', endResize);
+            resizerUsage.addEventListener('pointercancel', endResize);
+        }
+    }
+
+    // Watch the 640px boundary so layout-facing state (and CodeMirror measurement)
+    // is re-applied whenever the viewport crosses it. Applies once on initial load.
+    function updateViewVisibility() {
+        const mq = window.matchMedia('(min-width: 640px)');
+
+        function applyViewVisibility() {
+            // Clear any stale drag state left behind by an interrupted resize
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+            // CodeMirror must re-measure when the layout changes across the boundary
+            editor.refresh();
+        }
+
+        applyViewVisibility();
+
+        if (typeof mq.addEventListener === 'function') {
+            mq.addEventListener('change', applyViewVisibility);
+        } else if (typeof mq.addListener === 'function') {
+            mq.addListener(applyViewVisibility);
+        }
     }
 
     // Keep usage resizer hidden while the usage panel is hidden
