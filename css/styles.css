@@ -836,13 +836,20 @@ svg#minimapSvg {
 
 .btn {
     display: inline-flex;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    writing-mode: horizontal-tb !important;
+    flex-shrink: 0;
     gap: var(--spacing-sm);
     padding: var(--spacing-sm) var(--spacing-lg);
     border: none;
     border-radius: var(--radius-md);
     font-size: 0.9rem;
     font-weight: 600;
+    line-height: 1;
     cursor: pointer;
     transition: all var(--transition-fast);
 }
@@ -951,14 +958,60 @@ svg#minimapSvg {
     background: var(--type-struct);
 }
 
-/* Panel Footer & Status */
+/* Panel Footer & Status Controls */
 .panel-footer {
     display: flex;
+    flex-direction: row;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: rgba(0, 0, 0, 0.2);
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 6px 14px;
+    background: rgba(18, 19, 26, 0.85);
+    border-top: 1px solid var(--border-color);
     flex-shrink: 0;
+    min-height: 48px;
+    max-height: 48px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    box-sizing: border-box;
+}
+
+.panel-footer .btn {
+    height: 34px !important;
+    max-height: 34px !important;
+    padding: 0 14px !important;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    writing-mode: horizontal-tb !important;
+    flex-shrink: 0 !important;
+}
+
+.panel-footer .btn.primary {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
+.panel-footer .btn.primary:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.5);
+    transform: translateY(-1px);
+}
+
+.panel-footer .btn.secondary {
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.panel-footer .btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
 }
 
 .analysis-status {
