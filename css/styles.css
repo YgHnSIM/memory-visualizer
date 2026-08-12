@@ -1619,3 +1619,54 @@ svg#minimapSvg {
         padding-bottom: max(env(safe-area-inset-bottom), 8px);
     }
 }
+
+/* Mobile tab layout (todo 3): segmented tabs + single-panel view < 640px */
+@media (max-width: 639.98px) {
+    #viewTabs {
+        display: flex;
+        flex-shrink: 0;
+        gap: 4px;
+        padding: 8px 8px 0;
+        background: var(--bg-primary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .view-tabs button {
+        flex: 1;
+        padding: 10px 12px;
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        border-bottom: none;
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        font-size: 13px;
+        cursor: pointer;
+    }
+
+    .view-tabs button[aria-pressed="true"] {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border-color: var(--accent-primary);
+        box-shadow: inset 0 -2px 0 var(--accent-primary);
+    }
+
+    .panel {
+        display: none;
+    }
+
+    .panel.memory-view {
+        display: flex;
+    }
+
+    .panel.active {
+        display: flex;
+    }
+
+    .main-content:has(.panel.active:not(.memory-view)) .panel.memory-view {
+        display: none;
+    }
+
+    .resizer {
+        display: none;
+    }
+}
