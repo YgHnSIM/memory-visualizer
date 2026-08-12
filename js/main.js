@@ -532,6 +532,37 @@ int main() {
     // 640px boundary watcher (initial apply + on crossing)
     updateViewVisibility();
 
+    // Mobile (< 640px): segmented view tabs switch which single panel is visible
+    const viewTabs = document.getElementById('viewTabs');
+    const viewPanels = {
+        memory: document.querySelector('.panel.memory-view'),
+        code: document.querySelector('.panel.editor-pane'),
+        minimap: document.querySelector('.panel.side-pane')
+    };
+
+    function switchView(target) {
+        document.body.dataset.view = target;
+        for (const key of Object.keys(viewPanels)) {
+            if (viewPanels[key]) viewPanels[key].classList.toggle('active', key === target);
+        }
+        if (viewTabs) {
+            viewTabs.querySelectorAll('button[data-target]').forEach(function (btn) {
+                btn.setAttribute('aria-pressed', String(btn.dataset.target === target));
+            });
+        }
+        // CodeMirror must re-measure after coming back from display:none
+        if (target === 'code') editor.refresh();
+    }
+
+    if (viewTabs) {
+        viewTabs.addEventListener('click', function (e) {
+            const btn = e.target.closest('button[data-target]');
+            if (btn) switchView(btn.dataset.target);
+        });
+    }
+
+    switchView(document.body.dataset.view || 'memory');
+
     // Main analyze function
     let stepIndex = 0;
 
@@ -670,6 +701,16 @@ int main() {
                 list.appendChild(li);
             }
             panel.hidden = false;
+        }
+
+        // <640px: error/learning-point panels live inside the editor pane, so an
+        // active diagnostic must pull the user back to the code view
+        if (window.matchMedia('(max-width: 639.98px)').matches && document.body.dataset.view !== 'code') {
+            const lp = document.getElementById('learningPoints');
+            if (panel.hidden === false || (lp && lp.hidden === false)) {
+                switchView('code');
+                editor.refresh();
+            }
         }
     }
 
@@ -889,7 +930,9 @@ int main() {
             // Clear any stale drag state left behind by an interrupted resize
             document.body.style.cursor = '';
             document.body.style.userSelect = '';
-            // CodeMirror must re-measure when the layout changes across the boundary
+            // CodeMirror must re-measure and pick the right scrollbar mode when
+            // the layout changes across the boundary
+            editor.setOption('scrollbarStyle', window.matchMedia('(max-width: 639.98px)').matches ? 'null' : 'native');
             editor.refresh();
         }
 
@@ -900,6 +943,17 @@ int main() {
         } else if (typeof mq.addListener === 'function') {
             mq.addListener(applyViewVisibility);
         }
+
+        // Any resize can reflow the editor (e.g. rotate within the same breakpoint)
+        let resizeTimer = null;
+        const refreshOnResize = function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                editor.refresh();
+            }, 150);
+        };
+        window.addEventListener('resize', refreshOnResize);
+        window.addEventListener('orientationchange', refreshOnResize);
     }
 
     // Keep usage resizer hidden while the usage panel is hidden
