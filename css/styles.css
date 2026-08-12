@@ -1,4 +1,4 @@
-﻿/* ========================================
+/* ========================================
    C Memory Visualizer - Styles
    ======================================== */
 
@@ -962,43 +962,83 @@ svg#minimapSvg {
 }
 
 .analysis-status {
-    margin-left: auto;
-    font-size: 0.75rem;
-    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: #94a3b8;
     font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .analysis-status.has-error {
-    color: #f87171;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
 }
 
-/* Step Mode Controls */
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.status-dot.ready {
+    background-color: #94a3b8;
+    box-shadow: 0 0 6px rgba(148, 163, 184, 0.4);
+}
+
+.status-dot.success {
+    background-color: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.status-dot.error {
+    background-color: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+/* Step Mode Controls Bar */
 .step-controls {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    margin-left: var(--spacing-md);
-    padding-left: var(--spacing-md);
-    border-left: 1px solid var(--border-color);
+    gap: 8px;
+    padding: 3px 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .step-controls .btn {
-    padding: 2px 8px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
     font-size: 0.75rem;
+    border-radius: 6px;
 }
 
 .step-controls input[type="range"] {
-    width: 120px;
-    accent-color: var(--accent, #bd93f9);
+    width: 110px;
+    height: 4px;
+    accent-color: #8b5cf6;
+    cursor: pointer;
 }
 
 .step-info {
-    font-size: 0.7rem;
-    color: var(--text-muted);
+    font-size: 0.75rem;
+    color: #a78bfa;
     font-family: 'JetBrains Mono', monospace;
-    max-width: 260px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 500;
     white-space: nowrap;
 }
 

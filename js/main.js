@@ -649,12 +649,12 @@ int main() {
 
         const now = new Date().toLocaleTimeString('ko-KR', { hour12: false });
         if (items.length === 0) {
-            statusEl.textContent = `분석됨 ${now}`;
+            statusEl.innerHTML = `<span class="status-dot success"></span> 분석 완료 (${now})`;
             statusEl.classList.remove('has-error');
             panel.hidden = true;
             list.innerHTML = '';
         } else {
-            statusEl.textContent = `분석됨 ${now} · 문제 ${items.length}건`;
+            statusEl.innerHTML = `<span class="status-dot error"></span> 분석됨 (${now}) · 문제 ${items.length}건`;
             statusEl.classList.add('has-error');
             list.innerHTML = '';
             for (const item of items) {
@@ -759,7 +759,7 @@ int main() {
         syncUsageResizer();
         const statusEl = document.getElementById('analysisStatus');
         if (statusEl) {
-            statusEl.textContent = '준비됨';
+            statusEl.innerHTML = '<span class="status-dot ready"></span> 준비됨';
             statusEl.classList.remove('has-error');
         }
         const panel = document.getElementById('errorPanel');
