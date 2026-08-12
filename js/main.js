@@ -24,7 +24,11 @@ document.addEventListener('DOMContentLoaded', function () {
         smartIndent: false,
         electricChars: false,
         lineWrapping: true,
-        matchBrackets: true
+        matchBrackets: true,
+        scrollbarStyle: window.matchMedia('(max-width: 639.98px)').matches ? 'null' : 'native',
+        autocorrect: false,
+        autocapitalize: false,
+        spellcheck: false
     });
 
     // Event Listeners
