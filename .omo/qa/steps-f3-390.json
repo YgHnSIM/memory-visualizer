@@ -1,0 +1,18 @@
+[
+  {"type":"navigate"},
+  {"type":"wait","ms":1300},
+  {"type":"assert","expr":"getComputedStyle(document.querySelector('#viewTabs')).display === 'flex'","expected":true},
+  {"type":"assert","expr":"document.body.dataset.view === 'code'","expected":true},
+  {"type":"assert","expr":"document.documentElement.scrollWidth === window.innerWidth","expected":true},
+  {"type":"click","selector":"#viewTabs button[data-target=minimap]"},
+  {"type":"assert","expr":"document.querySelector('#minimapSvg').getBoundingClientRect().height > 100","expected":true},
+  {"type":"eval","expr":"(() => { const svg = document.querySelector('#minimapSvg'); const g = svg.querySelector('g'); const r = svg.getBoundingClientRect(); const mk = (t, x, y) => new PointerEvent(t, { clientX: x, clientY: y, pointerId: 7, pointerType: 'touch', bubbles: true, cancelable: true }); const x0 = r.left + 40, y0 = r.top + 60; const before = g.getAttribute('transform'); svg.dispatchEvent(mk('pointerdown', x0, y0)); svg.dispatchEvent(mk('pointermove', x0 - 40, y0 + 30)); svg.dispatchEvent(mk('pointerup', x0 - 40, y0 + 30)); window.__pan2 = before !== g.getAttribute('transform'); return window.__pan2; })()","as":"touch-pan"},
+  {"type":"assert","expr":"window.__pan2 === true","expected":true},
+  {"type":"click","selector":"#viewTabs button[data-target=memory]"},
+  {"type":"eval","expr":"(() => { const b = document.querySelector('.pointer-badge.clickable'); if (!b) throw new Error('no badge'); b.scrollIntoView({ block: 'center', inline: 'center' }); return true; })()","as":"badge-into-view"},
+  {"type":"click","selector":".pointer-badge.clickable"},
+  {"type":"wait","ms":200},
+  {"type":"assert","expr":"document.querySelectorAll('.pointer-target-active').length > 0","expected":true},
+  {"type":"screenshot","name":"01-memory-badge"},
+  {"type":"consoleLog","name":"console"}
+]
